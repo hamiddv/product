@@ -11,18 +11,37 @@ urlpatterns = [
     ),
 
     path(
-        'api/category/<str:category>/',
-        AllCategoryApi
+        "/api/",
+        AllProductApi
+    ),
+    #
+    # path(
+    #     'api/category/<str:category>/',
+    #     AllCategoryApi
+    # ),
+    #
+    # path(
+    #     'api/company/<str:company>/',
+    #     AllCompanyApi
+    # ),
+
+    # path(
+        # 'api/price/<int:price>/',
+        # MaxPriceiApi
+    # ),
+
+    path(
+        'api/detail/<int:id>',
+        IdProductApi
     ),
 
     path(
-        'api/company/<int:id>/',
-        AllCompanyApi
+        'api/categories-list/',
+        CategoryList
     ),
 
     path(
-        'api/price/<int:price>/',
-        MaxPriceiApi
+        'api/companyies-list/',
+        CompanyList
     ),
-
 ]
