@@ -6,12 +6,17 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path(
+        'filter/<str:category>/<str:company>/<str:color>/<str:price>/',
+        Filter
+    ),
+
+    path(
         "home/api/",
         HomeProductApi
     ),
 
     path(
-        "/api/",
+        "api/",
         AllProductApi
     ),
     #
@@ -31,7 +36,7 @@ urlpatterns = [
     # ),
 
     path(
-        'api/detail/<int:id>',
+        'api/detail/<int:id>/',
         IdProductApi
     ),
 
@@ -44,4 +49,10 @@ urlpatterns = [
         'api/companyies-list/',
         CompanyList
     ),
+
+    path(
+        'api/colors-list/',
+        ColorList
+    ),
+
 ]

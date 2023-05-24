@@ -143,6 +143,73 @@ def CompanyList(requset):
     )
 
 
+@api_view(['get'])
+def ColorList(requset):
+    color = Color.objects.all()
+    serializer = Colorserializer(
+        color,
+        many=True
+    )
+    return Response(
+        serializer.data
+    )
+
+
+@api_view(['GET'])
+def Filter(request, category, company, color, price):
+    products = Product.objects.all()
+    print(products)
+    print(category)
+    print(company)
+    print(color)
+    print(price)
+    if category != '-':
+        try:
+            category = int(category)
+        except ValueError:
+            pass
+        else:
+            products = products.filter(category=category)
+
+        print('cat', products)
+    if company != '-':
+        try:
+            company = int(company)
+        except ValueError:
+            pass
+        else:
+            products = products.filter(company=company)
+
+        print('com',products)
+    if color != '-':
+        try:
+            color = int(color)
+        except ValueError:
+            pass
+        else:
+            products = products.filter(color=color)
+
+        print('col', products)
+    if price != '-':
+        try:
+            price = int(price)
+        except ValueError:
+            pass
+        else:
+            products = products.filter(price__lte=price)
+
+        print('price', products)
+
+    serializer = HomeProductSerializer(
+        products,
+        many=True
+    ).data
+
+    return Response(
+        serializer
+    )
+
+
 class HomeProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
@@ -182,6 +249,7 @@ class CategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = [
+            'id',
             'category'
         ]
 
@@ -190,5 +258,15 @@ class CompanyListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = [
+            'id',
             'company'
+        ]
+
+
+class Colorserializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'color'
         ]

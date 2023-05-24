@@ -29,6 +29,17 @@ class Company(models.Model):
         verbose_name_plural = 'brands'
 
 
+class Color(models.Model):
+    color = models.CharField(max_length=6)
+
+    def __str__(self):
+        return self.color
+
+    class Meta:
+        verbose_name = 'color'
+        verbose_name_plural = 'colors'
+
+
 class Product(models.Model):
     name = models.CharField(
         max_length=256
@@ -78,32 +89,11 @@ class Product(models.Model):
         blank=True,
     )
 
-    color_one = models.CharField(
-        max_length=50
-    )
-
-    color_two = models.CharField(
-        max_length=50,
+    color = models.ForeignKey(
+        Color,
+        on_delete=models.CASCADE,
         null=True,
-        blank=True,
-    )
-
-    color_three = models.CharField(
-        max_length=50,
-        null=True,
-        blank=True,
-    )
-
-    color_four = models.CharField(
-        max_length=50,
-        null=True,
-        blank=True,
-    )
-
-    color_five = models.CharField(
-        max_length=50,
-        null=True,
-        blank=True,
+        blank=True
     )
 
     company = models.ForeignKey(
