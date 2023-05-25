@@ -60,6 +60,10 @@ class Product(models.Model):
         default=False
     )
 
+    free_shoping = models.BooleanField(
+        default=False
+    )
+
     sku = models.CharField(max_length=10)
 
     image_one = models.ImageField(

@@ -1,6 +1,6 @@
 import random
 
-from django.http import HttpResponseNotFound
+from django.http import response , HttpResponseNotFound, HttpResponseBadRequest
 
 from rest_framework.decorators import api_view
 from rest_framework import serializers
@@ -58,6 +58,7 @@ def IdProductApi(request, id):
         serializer = AllProductSerializer(
             products
         )
+        products.increase_views()
         return Response(
             serializer.data
         )
@@ -191,13 +192,63 @@ def filterItem(request):
 
 
 @api_view(['GET'])
-def Filter(request, category, company, color, price):
-    products = Product.objects.order_by('-price')
+def Filter(
+        request,
+        category,
+        company,
+        color,
+        price,
+        sort_by,
+        free_shoping):
+
+    check_sort_by = [
+        'A',
+        'Z',
+        'H',
+        'L'
+    ]
+    check_free_sopping = [
+        't',
+    ]
+
+    if sort_by in check_sort_by:
+        if sort_by == check_sort_by[0]:
+            try:
+                products = Product.objects.order_by('name')
+            except ValueError:
+                return HttpResponseBadRequest
+            else:
+                products = Product.objects.order_by('name')
+        elif sort_by == check_sort_by[1]:
+            try:
+                products = Product.objects.order_by('-name')
+            except ValueError:
+                return HttpResponseBadRequest()
+            else:
+                products = Product.objects.order_by('-name')
+        elif sort_by == check_sort_by[2]:
+            try:
+                products = Product.objects.order_by('-price')
+            except ValueError:
+                return HttpResponseBadRequest()
+            else:
+                products = Product.objects.order_by('-price')
+        elif sort_by == check_sort_by[3]:
+            try:
+                products = Product.objects.order_by('price')
+            except ValueError:
+                return HttpResponseBadRequest()
+            else:
+                products = Product.objects.order_by('price')
+    else:
+        return HttpResponseBadRequest()
+
+
     if category != '-':
         try:
             category = int(category)
         except ValueError:
-            pass
+            return HttpResponseBadRequest()
         else:
             products = products.filter(category=category)
 
@@ -205,7 +256,7 @@ def Filter(request, category, company, color, price):
         try:
             company = int(company)
         except ValueError:
-            pass
+            return HttpResponseBadRequest()
         else:
             products = products.filter(company=company)
 
@@ -213,7 +264,7 @@ def Filter(request, category, company, color, price):
         try:
             color = int(color)
         except ValueError:
-            pass
+            return HttpResponseBadRequest()
         else:
             products = products.filter(color=color)
 
@@ -221,9 +272,13 @@ def Filter(request, category, company, color, price):
         try:
             price = int(price)
         except ValueError:
-            pass
+            return HttpResponseBadRequest()
         else:
             products = products.filter(price__lte=price)
+
+    if free_shoping in check_free_sopping:
+        products =products.filter(free_shoping=True)
+
 
     serializer = HomeProductSerializer(
         products,
@@ -253,6 +308,8 @@ class AllProductSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'price',
+            'available',
+            'free_shoping',
             'image_one',
             'image_two',
             'image_three',

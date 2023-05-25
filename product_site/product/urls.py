@@ -6,7 +6,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path(
-        'filter/<str:category>/<str:company>/<str:color>/<str:price>/',
+        'filter/<str:category>/<str:company>/<str:color>/<str:price>/<str:sort_by>/<str:free_shoping>/',
         Filter
     ),
 
