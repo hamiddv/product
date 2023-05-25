@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework import serializers
 from rest_framework.response import Response
 from .models import *
-from django.db.models import Max
+from django.db.models import Max, Min
 
 
 @api_view(['get'])
@@ -177,6 +177,7 @@ def filterItem(request):
     ).data
 
     maxprice = Product.objects.aggregate(max_value=Max('price'))['max_value']
+    lowest_price = Product.objects.aggregate(lowest_price=Min('price'))['lowest_price']
 
     res = {
             'color': serializercol,
@@ -184,6 +185,7 @@ def filterItem(request):
             'category': serializercat,
             'products': serializerprod,
             'maxprice': maxprice,
+            'lowprice': lowest_price,
     }
 
     return Response(
