@@ -46,7 +46,7 @@ urlpatterns = [
     ),
 
     path(
-        'api/companyies-list/',
+        'api/companies-list/',
         CompanyList
     ),
 
@@ -55,4 +55,8 @@ urlpatterns = [
         ColorList
     ),
 
+    path(
+        'filter-item/',
+        filterItem
+    )
 ]

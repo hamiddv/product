@@ -1,26 +1,18 @@
 import random
 
-from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound
+from django.http import HttpResponseNotFound
 
-from django.shortcuts import render, get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework import serializers
 from rest_framework.response import Response
-from .models import Product
-from django.core.files import File
-from django.conf import settings
-import requests
-from io import BytesIO
-from urllib.parse import urlparse
-from urllib.request import urlopen
-from urllib.error import HTTPError
 from .models import *
+from django.db.models import Max
 
 
 @api_view(['get'])
 def AllProductApi(request):
     try:
-        products = Product.objects.all()
+        products = Product.objects.order_by('-price')
         serializer = HomeProductSerializer(
             products,
             many=True
@@ -30,29 +22,31 @@ def AllProductApi(request):
         )
     except Product.DoesNotExist:
         return HttpResponseNotFound("product not found")
-        # return HttpResponseServerError("خطای سرور رخ داد.")
 
 
 @api_view(['get'])
 def HomeProductApi(request):
     last_id = Product.objects.latest('id').id
     first_id = Product.objects.first().id
-    print('#' * 20)
-    print(first_id)
+    id_list = []
+    while len(id_list) < 3:
+        item = random.randint(first_id, last_id)
+        if item not in id_list:
+            id_list.append(item)
 
-    product_1 = Product.objects.get(id=(random.randint(first_id, last_id)))
-    product_2 = Product.objects.get(id=(random.randint(first_id, last_id)))
-    product_3 = Product.objects.get(id=(random.randint(first_id, last_id)))
+    product_1 = Product.objects.get(id=id_list[0])
+    product_2 = Product.objects.get(id=id_list[1])
+    product_3 = Product.objects.get(id=id_list[2])
 
-    serializer1 = HomeProductSerializer(product_1)
-    serializer2 = HomeProductSerializer(product_2)
-    serializer3 = HomeProductSerializer(product_3)
+    serializer1 = HomeProductSerializer(product_1).data
+    serializer2 = HomeProductSerializer(product_2).data
+    serializer3 = HomeProductSerializer(product_3).data
 
-    data = {
-        'Product1': serializer1.data,
-        'Product2': serializer2.data,
-        'Product3': serializer3.data,
-    }
+    data = [
+        serializer1,
+        serializer2,
+        serializer3,
+    ]
 
     return Response(data)
 
@@ -156,13 +150,49 @@ def ColorList(requset):
 
 
 @api_view(['GET'])
+def filterItem(request):
+    color = Color.objects.all()
+    serializercol = Colorserializer(
+        color,
+        many=True
+    ).data
+
+    company = Company.objects.all()
+    serializercom = CompanyListSerializer(
+        company,
+        many=True
+    ).data
+
+    categories = Category.objects.all()
+    serializercat = CategoryListSerializer(
+        categories,
+        many=True
+    ).data
+
+    products = Product.objects.order_by('-price')
+    serializerprod =HomeProductSerializer(
+        products,
+        many=True
+    ).data
+
+    maxprice = Product.objects.aggregate(max_value=Max('price'))['max_value']
+
+    res = {
+            'color': serializercol,
+            'company': serializercom,
+            'category': serializercat,
+            'products': serializerprod,
+            'maxprice': maxprice,
+    }
+
+    return Response(
+        res
+    )
+
+
+@api_view(['GET'])
 def Filter(request, category, company, color, price):
-    products = Product.objects.all()
-    print(products)
-    print(category)
-    print(company)
-    print(color)
-    print(price)
+    products = Product.objects.order_by('-price')
     if category != '-':
         try:
             category = int(category)
@@ -171,7 +201,6 @@ def Filter(request, category, company, color, price):
         else:
             products = products.filter(category=category)
 
-        print('cat', products)
     if company != '-':
         try:
             company = int(company)
@@ -180,7 +209,6 @@ def Filter(request, category, company, color, price):
         else:
             products = products.filter(company=company)
 
-        print('com',products)
     if color != '-':
         try:
             color = int(color)
@@ -189,7 +217,6 @@ def Filter(request, category, company, color, price):
         else:
             products = products.filter(color=color)
 
-        print('col', products)
     if price != '-':
         try:
             price = int(price)
@@ -197,8 +224,6 @@ def Filter(request, category, company, color, price):
             pass
         else:
             products = products.filter(price__lte=price)
-
-        print('price', products)
 
     serializer = HomeProductSerializer(
         products,
@@ -233,11 +258,7 @@ class AllProductSerializer(serializers.ModelSerializer):
             'image_three',
             'image_four',
             'image_five',
-            'color_one',
-            'color_two',
-            'color_three',
-            'color_four',
-            'color_five',
+            'color',
             'category',
             'company',
             'category',
