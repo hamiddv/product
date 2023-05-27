@@ -13,7 +13,7 @@ from django.db.models import Max, Min
 def AllProductApi(request):
     try:
         products = Product.objects.order_by('-price')
-        serializer = HomeProductSerializer(
+        serializer = FilterProductSerializer(
             products,
             many=True
         )
@@ -28,25 +28,19 @@ def AllProductApi(request):
 def HomeProductApi(request):
     last_id = Product.objects.latest('id').id
     first_id = Product.objects.first().id
-    id_list = []
-    while len(id_list) < 3:
+    serializer_list = []
+    while len(serializer_list) < 4:
         item = random.randint(first_id, last_id)
-        if item not in id_list:
-            id_list.append(item)
+        if Product.objects.filter(id=item).exists():
+            product = Product.objects.get(id=item)
+            serializer = HomeProductSerializer(product).data
+            serializer_list.append(serializer)
 
-    product_1 = Product.objects.get(id=id_list[0])
-    product_2 = Product.objects.get(id=id_list[1])
-    product_3 = Product.objects.get(id=id_list[2])
 
-    serializer1 = HomeProductSerializer(product_1).data
-    serializer2 = HomeProductSerializer(product_2).data
-    serializer3 = HomeProductSerializer(product_3).data
-
-    data = [
-        serializer1,
-        serializer2,
-        serializer3,
-    ]
+    data = []
+    for i in range(len(serializer_list)):
+        index = i - 1
+        data.append(serializer_list[index])
 
     return Response(data)
 
@@ -65,54 +59,6 @@ def IdProductApi(request, id):
     except Product.DoesNotExist:
         return HttpResponseNotFound("product not found")
 
-
-# @api_view(['get'])
-# def AllCategoryApi(request, category):
-#     try:
-#         products = Product.objects.filter(category=category)
-#         serializer = HomeProductSerializer(
-#             products,
-#             many=True
-#         )
-#         return Response(
-#             serializer.data
-#         )
-#     except Product.DoesNotExist:
-#         return HttpResponseNotFound("product not found")
-#         # return HttpResponseServerError("this category dose not exist")
-
-
-# @api_view(['get'])
-# def AllCompanyApi(request, company):
-#     try:
-#         products = Product.objects.filter(company=company)
-#         serializer = HomeProductSerializer(
-#             products,
-#             many=True
-#         )
-#         return Response(
-#             serializer.data
-#         )
-#     except Product.DoesNotExist:
-#         return HttpResponseNotFound("product not found")
-#         # return HttpResponseServerError("this company dose not exist")
-#
-#
-# @api_view(['get'])
-# def MaxPriceiApi(request, price):
-#     try:
-#         products = Product.objects.filter(price__lt=price)
-#         serializer = HomeProductSerializer(
-#             products,
-#             many=True
-#         )
-#         return Response(
-#             serializer.data
-#         )
-#     except Product.DoesNotExist:
-#         return HttpResponseNotFound("category not found")
-#         # return HttpResponseServerError("this price dose not exist")
-#
 
 @api_view(['get'])
 def CategoryList(requset):
@@ -171,7 +117,7 @@ def filterItem(request):
     ).data
 
     products = Product.objects.order_by('-price')
-    serializerprod =HomeProductSerializer(
+    serializerprod =FilterProductSerializer(
         products,
         many=True
     ).data
@@ -199,7 +145,8 @@ def Filter(
         category,
         company,
         color,
-        price,
+        min_price,
+        max_price,
         sort_by,
         free_shoping):
 
@@ -270,19 +217,20 @@ def Filter(
         else:
             products = products.filter(color=color)
 
-    if price != '-':
+    if min_price != '-' and max_price != '-':
         try:
-            price = int(price)
+            min_price = int(min_price)
+            max_price = int(max_price)
         except ValueError:
             return HttpResponseBadRequest()
         else:
-            products = products.filter(price__lte=price)
+            products = products.filter(price__gte=min_price, price__lte=max_price)
 
     if free_shoping in check_free_sopping:
         products =products.filter(free_shoping=True)
 
 
-    serializer = HomeProductSerializer(
+    serializer = FilterProductSerializer(
         products,
         many=True
     ).data
@@ -299,6 +247,18 @@ class HomeProductSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'price',
+            'image_one',
+        ]
+
+
+class FilterProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'name',
+            'price',
+            'description',
             'image_one',
         ]
 
