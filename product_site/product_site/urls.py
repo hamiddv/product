@@ -20,6 +20,18 @@ urlpatterns = [
         include(
             "home_generate.urls"
         )
+    ),
+    path(
+        'about/',
+        include(
+            "about.urls"
+        )
+    ),
+    path(
+        'user/',
+        include(
+            "user.urls"
+        )
     )
 
 ] + static(

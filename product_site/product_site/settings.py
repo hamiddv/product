@@ -40,7 +40,9 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'product',
+    'about',
     'home_generate',
+    'user',
     'corsheaders',
 
 ]
@@ -117,6 +119,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
+# AUTH_USER_MODEL = 'user.CustomUser'
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -137,11 +141,11 @@ STATIC_URL = 'static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), )
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), )
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

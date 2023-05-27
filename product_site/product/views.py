@@ -1,6 +1,6 @@
 import random
 
-from django.http import response , HttpResponseNotFound, HttpResponseBadRequest
+from django.http import response, HttpResponseNotFound, HttpResponseBadRequest
 
 from rest_framework.decorators import api_view
 from rest_framework import serializers
