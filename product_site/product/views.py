@@ -145,10 +145,10 @@ def Filter(
         category,
         company,
         color,
-        min_price,
         max_price,
         sort_by,
-        free_shoping):
+        free_shoping,
+        search):
 
     check_sort_by = [
         'A',
@@ -190,45 +190,42 @@ def Filter(
             else:
                 products = Product.objects.order_by('price')
     else:
-        return HttpResponseBadRequest()
-
-
+        products = Product.objects.all()
     if category != '-':
         try:
             category = int(category)
+            products = products.filter(category=category)
         except ValueError:
             return HttpResponseBadRequest()
         else:
-            products = products.filter(category=category)
+           pass
 
     if company != '-':
         try:
             company = int(company)
+            products = products.filter(company=company)
         except ValueError:
             return HttpResponseBadRequest()
-        else:
-            products = products.filter(company=company)
 
     if color != '-':
         try:
             color = int(color)
-        except ValueError:
-            return HttpResponseBadRequest()
-        else:
             products = products.filter(color=color)
-
-    if min_price != '-' and max_price != '-':
-        try:
-            min_price = int(min_price)
-            max_price = int(max_price)
         except ValueError:
             return HttpResponseBadRequest()
-        else:
-            products = products.filter(price__gte=min_price, price__lte=max_price)
+
+    if max_price != '-':
+        try:
+            max_price = int(max_price)
+            products = products.filter(price__lte=max_price)
+        except ValueError:
+            return HttpResponseBadRequest()
 
     if free_shoping in check_free_sopping:
         products =products.filter(free_shoping=True)
 
+    if search != '-':
+        products = products.filter(name__startswith=search)
 
     serializer = FilterProductSerializer(
         products,
