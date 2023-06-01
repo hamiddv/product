@@ -237,7 +237,7 @@ class HomeProductSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'price',
-            'image_one',
+            'active_image',
         ]
 
 
@@ -249,7 +249,7 @@ class FilterProductSerializer(serializers.ModelSerializer):
             'name',
             'price',
             'description',
-            'image_one',
+            'active_image',
         ]
 
 
@@ -258,8 +258,6 @@ class AllProductSerializer(serializers.ModelSerializer):
 
     def get_images(self, obj):
         image_sources = []
-        if obj.image_one:
-            image_sources.append(obj.image_one.url)
         if obj.image_two:
             image_sources.append(obj.image_two.url)
         if obj.image_three:
@@ -278,6 +276,7 @@ class AllProductSerializer(serializers.ModelSerializer):
             'price',
             'available',
             'free_shoping',
+            'active_image',
             'images',
             'color',
             'category',

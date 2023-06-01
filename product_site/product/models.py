@@ -66,7 +66,7 @@ class Product(models.Model):
 
     sku = models.CharField(max_length=10)
 
-    image_one = models.ImageField(
+    active_image = models.ImageField(
         upload_to="./media/product/img/%y/%m/%d/"
     )
 
