@@ -29,7 +29,7 @@ def HomeProductApi(request):
     last_id = Product.objects.latest('id').id
     first_id = Product.objects.first().id
     serializer_list = []
-    while len(serializer_list) < 4:
+    while len(serializer_list) < 3:
         item = random.randint(first_id, last_id)
         if Product.objects.filter(id=item).exists():
             product = Product.objects.get(id=item)
@@ -116,12 +116,6 @@ def filterItem(request):
         many=True
     ).data
 
-    products = Product.objects.order_by('-price')
-    serializerprod =FilterProductSerializer(
-        products,
-        many=True
-    ).data
-
     maxprice = Product.objects.aggregate(max_value=Max('price'))['max_value']
     lowest_price = Product.objects.aggregate(lowest_price=Min('price'))['lowest_price']
 
@@ -129,7 +123,6 @@ def filterItem(request):
             'color': serializercol,
             'company': serializercom,
             'category': serializercat,
-            'products': serializerprod,
             'maxprice': maxprice,
             'lowprice': lowest_price,
     }
@@ -216,7 +209,7 @@ def Filter(
 
     if max_price != '-':
         try:
-            max_price = int(max_price)
+            max_price = float(max_price)
             products = products.filter(price__lte=max_price)
         except ValueError:
             return HttpResponseBadRequest()
@@ -261,6 +254,22 @@ class FilterProductSerializer(serializers.ModelSerializer):
 
 
 class AllProductSerializer(serializers.ModelSerializer):
+    images = serializers.SerializerMethodField()
+
+    def get_images(self, obj):
+        image_sources = []
+        if obj.image_one:
+            image_sources.append(obj.image_one.url)
+        if obj.image_two:
+            image_sources.append(obj.image_two.url)
+        if obj.image_three:
+            image_sources.append(obj.image_three.url)
+        if obj.image_four:
+            image_sources.append(obj.image_four.url)
+        if obj.image_five:
+            image_sources.append(obj.image_five.url)
+        return image_sources
+
     class Meta:
         model = Product
         fields = [
@@ -269,15 +278,10 @@ class AllProductSerializer(serializers.ModelSerializer):
             'price',
             'available',
             'free_shoping',
-            'image_one',
-            'image_two',
-            'image_three',
-            'image_four',
-            'image_five',
+            'images',
             'color',
             'category',
             'company',
-            'category',
             'views',
         ]
 
