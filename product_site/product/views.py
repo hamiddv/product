@@ -51,10 +51,28 @@ def IdProductApi(request, id):
         products = Product.objects.get(id=id)
         serializer = AllProductSerializer(
             products
-        )
+        ).data
+
+        print ("#" * 2000)
+        print(products)
+        brand = str(products.company)
+        color = str(products.color)
+        print(products.company)
+        print(products.color)
+        data = [
+            serializer,
+            {
+                "brand": brand
+            },
+            {
+                "color": color
+            },
+
+        ]
         products.increase_views()
+
         return Response(
-            serializer.data
+            data
         )
     except Product.DoesNotExist:
         return HttpResponseNotFound("product not found")
@@ -258,6 +276,8 @@ class AllProductSerializer(serializers.ModelSerializer):
 
     def get_images(self, obj):
         image_sources = []
+        if obj.active_image:
+            image_sources.append(obj.active_image.url)
         if obj.image_two:
             image_sources.append(obj.image_two.url)
         if obj.image_three:
@@ -274,13 +294,13 @@ class AllProductSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'price',
+            'description',
             'available',
             'free_shoping',
             'active_image',
             'images',
-            'color',
-            'category',
-            'company',
+            'sku',
+            'score',
             'views',
         ]
 
