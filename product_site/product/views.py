@@ -53,12 +53,8 @@ def IdProductApi(request, id):
             products
         ).data
 
-        print ("#" * 2000)
-        print(products)
         brand = str(products.company)
         color = str(products.color)
-        print(products.company)
-        print(products.color)
         data = [
             serializer,
             {
