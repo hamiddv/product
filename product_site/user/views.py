@@ -46,30 +46,44 @@ def email_verify(request):
     except ObjectDoesNotExist:
         return Response({'message': 'Invalid username'}, status=status.HTTP_404_NOT_FOUND)
 
-    if user.email == email:
+    if code != False:
+        if user.email == email:
 
+            if new_code == True:
+                create_code_verify_email(username)
+                print(user.email_verify_code)
+            if code == user.email_verify_code:
+                user.is_email_verified = True
+                user.email_verify_code = None
+                user.save()
+                return Response(
+                    {
+                        'message': 'Verification code is valid'
+                    },print(user.email_verify_code)
+                    ,
+                    print(status=status.HTTP_200_OK)
+                )
+            else:
+                return Response(
+                    {
+                        'message': 'Invalid verification code'
+                    },print(user.email_verify_code)
+                    ,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+
+    elif code == False:
         if new_code == True:
             create_code_verify_email(username)
-
-        if code == user.email_verification_code:
-            user.is_email_verified = True
-            user.email_verification_code = None
-            user.save()
             return Response(
                 {
-                    'message': 'Verification code is valid'
-                },
-
-                status=status.HTTP_200_OK
+                    'message' :'code creaetd'
+                }, user.email_verify_code
             )
-        else:
-            return Response(
-                {
-                    'message': 'Invalid verification code'
-                },
 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+
+
 
 
 @api_view(['POST'])
