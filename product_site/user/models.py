@@ -12,7 +12,7 @@ class CustomUser(AbstractBaseUser):
     email = models.EmailField(unique=True)
     is_admin = models.BooleanField(default=False)
     is_email_verified = models.BooleanField(default=False)
-    email_verify_code = models.IntegerField(null=True)
+    email_verify_code = models.CharField(null=True, max_length=6)
 
     objects = AccountManager()
 

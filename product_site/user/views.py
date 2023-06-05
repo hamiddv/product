@@ -13,22 +13,14 @@ from random import randint
 
 @api_view(['POST'])
 def create_user(request):
-    if len(request.data('username')) < 8:
-        return Response(
-            status.HTTP_400_BAD_REQUEST
-        )
-    if len(request.data('password')) < 8:
-        return Response(
-            status.HTTP_400_BAD_REQUEST
-        )
-
     serializer = CustomUserSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED,
-        ),
+        )
+
     return Response(
         serializer.errors,
         status=status.HTTP_400_BAD_REQUEST
@@ -44,46 +36,46 @@ def create_code_verify_email(username):
 
 @api_view(['POST'])
 def email_verify(request):
-    username = request.data.get('username')
-    email = request.data.get('email')
-    code = request.data.get('code')
-    new_code = request.data.get('new_code')
+    username = request.data['username']
+    email = request.data['email']
+    code = request.data['code']
+    new_code = request.data['new_code']
 
     try:
         user = CustomUser.objects.get(username=username)
     except ObjectDoesNotExist:
         return Response({'message': 'Invalid username'}, status=status.HTTP_404_NOT_FOUND)
 
+    if user.email == email:
 
-    if new_code == True or user.email_verification_code == None:
-        create_code_verify_email(username)
-        real_code = user.email_verification_code
+        if new_code == True:
+            create_code_verify_email(username)
 
+        if code == user.email_verification_code:
+            user.is_email_verified = True
+            user.email_verification_code = None
+            user.save()
+            return Response(
+                {
+                    'message': 'Verification code is valid'
+                },
 
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {
+                    'message': 'Invalid verification code'
+                },
 
-    if code == real_code:
-        user.email_verification_code = None
-        return Response(
-            {
-                'message': 'Verification code is valid'
-            },
-
-            status=status.HTTP_200_OK
-        )
-    else:
-        return Response(
-            {
-                'message': 'Invalid verification code'
-            },
-
-            status=status.HTTP_400_BAD_REQUEST
-        )
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 @api_view(['POST'])
 def login_user(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
+    username = request.data['username']
+    password = request.data['password']
     user = authenticate(request, username=username, password=password)
 
     if user:
