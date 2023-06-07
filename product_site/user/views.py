@@ -36,6 +36,7 @@ def create_code_verify_email(username):
 
 @api_view(['POST'])
 def email_verify(request):
+    print(request.data)
     username = request.data['username']
     email = request.data['email']
     code = request.data['code']
@@ -54,7 +55,7 @@ def email_verify(request):
 
     if new_code == True:
         create_code_verify_email(username)
-        print('real code' + user.email_verify_code)
+        print('real code', user.email_verify_code)
         # print('new code' + new_code)
 
     # print('new_code' , user.email_verify_code)
@@ -98,11 +99,6 @@ def email_verify(request):
         },
         status=status.HTTP_400_BAD_REQUEST
     )
-
-
-
-
-
 
 
 @api_view(['POST'])
