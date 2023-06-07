@@ -36,11 +36,9 @@ def create_code_verify_email(username):
 
 @api_view(['POST'])
 def email_verify(request):
-    print(request.data)
     username = request.data['username']
     email = request.data['email']
     code = request.data['code']
-    print('code = ' , code)
     new_code = request.data['new_code']
 
     try:
@@ -55,14 +53,16 @@ def email_verify(request):
 
     if new_code == True:
         create_code_verify_email(username)
-        print('real code', user.email_verify_code)
-        # print('new code' + new_code)
+        return Response(
+            {
+                "message": 'new code created'
+             },
+            status=status.HTTP_200_OK
+        )
 
-    # print('new_code' , user.email_verify_code)
     if code != False:
 
         if code == user.email_verify_code:
-            print(user.email_verify_code)
             user.is_email_verified = True
             user.email_verify_code = None
             user.save()
@@ -73,24 +73,13 @@ def email_verify(request):
                 status=status.HTTP_200_OK
             )
 
-        else:
+        elif code != user.email_verify_code:
             return Response(
                 {
                     'message': 'Invalid verification code',
 
                 },
                 status=status.HTTP_400_BAD_REQUEST
-            )
-
-    elif code == False:
-        if new_code == True:
-            create_code_verify_email(username)
-            print(user.email_verify_code)
-            return Response(
-                {
-                    'message': 'code created'
-                },
-                status=status.HTTP_200_OK
             )
 
     return Response(
