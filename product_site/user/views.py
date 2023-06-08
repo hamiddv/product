@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.hashers import make_password
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -30,6 +31,13 @@ def create_user(request):
 def create_code_verify_email(username):
     code = randint(100000, 999999)
     user = CustomUser.objects.get(username=username)
+    user.email_verify_code = code
+    user.save()
+
+
+def create_code_forget_password(email):
+    code = randint(100000, 999999)
+    user = CustomUser.objects.get(email=email)
     user.email_verify_code = code
     user.save()
 
@@ -112,6 +120,8 @@ def login_user(request):
 
     if user:
         token, created = Token.objects.get_or_create(user=user)
+        user.token = token.key
+        user.save
         return Response(
             {
                 'token': token.key
@@ -125,6 +135,71 @@ def login_user(request):
             },
             status=status.HTTP_401_UNAUTHORIZED
         )
+
+
+@api_view(['POST'])
+def forget_password(request):
+    email = request.data['email']
+    new_code = request.data['new_code']
+    new_password = request.data['new_password']
+    code = request.data['code']
+
+    try:
+        user = CustomUser.objects.get(email=email)
+    except:
+        return Response(
+            {
+                'message': 'email notfound'
+            }
+        )
+
+    if new_code:
+        create_code_forget_password(email)
+        return Response(
+            {
+                'message': 'new code created'
+            }
+        )
+
+    if code is not False:
+        if code == user.email_verify_code:
+            user.is_email_verified = True
+
+            return Response(
+                {
+                    'message': 'code verifyed'
+                },
+                status=status.HTTP_200_OK
+            )
+
+        else:
+            return Response(
+                {
+                    'message': 'code is not valid'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    if new_password is not False:
+        if user.email_verify_code is not None:
+            hashed_password = make_password(new_password)
+            user.password = hashed_password
+            user.email_verify_code = None
+            user.save()
+
+            return Response(
+                {
+                    'meassage': 'user password changed'
+                },
+                status=status.HTTP_200_OK
+            )
+
+    else:
+        pass
+
+    return Response(
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
 
 class CustomUserSerializer(serializers.ModelSerializer):

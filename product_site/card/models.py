@@ -1,6 +1,7 @@
 from django.db import models
 
-from product_site.user.models import CustomUser
+from user.models import CustomUser
+from product.models import Product
 
 
 class UserCard(models.Model):
@@ -9,5 +10,9 @@ class UserCard(models.Model):
         on_delete=models.CASCADE,
     )
 
-    product = models.IntegerField()
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE
+    )
+
     count = models.IntegerField()

@@ -46,8 +46,9 @@ INSTALLED_APPS = [
     'about',
     'home_generate',
     'user',
-    'corsheaders',
+    'card',
 
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -97,7 +98,6 @@ DATABASES = {
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
-'rest_framework_simplejwt.authentication.JWTAuthentication',
     ]
 }
 

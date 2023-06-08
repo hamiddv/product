@@ -1,12 +1,10 @@
-from rest_framework_simplejwt.authentication import JWTAuthentication
-
-from product_site.user.models import CustomUser
+from ..user.models import CustomUser
 
 
-def get_user_from_token(token):
+def find_user_by_token(username, token):
     try:
-        validated_token = JWTAuthentication().get_validated_token(token)
-        user = JWTAuthentication().get_user(validated_token)
-        return user
+        user = CustomUser.objects.get(username=username, token=token)
     except:
         return None
+    else:
+        return user
