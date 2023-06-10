@@ -37,7 +37,8 @@ def add_card(request):
                 return Response(
                     {
                         'massage': 'card saved',
-                        'available': available
+                        'available': available,
+                        'max_count': product.available
                     },
                     status=status.HTTP_200_OK
                 )
