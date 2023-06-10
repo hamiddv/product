@@ -32,7 +32,13 @@ urlpatterns = [
         include(
             "user.urls"
         )
-    )
+    ),
+     path(
+         'card/',
+         include(
+             "card.urls"
+         )
+     )
 
 ] + static(
         settings.MEDIA_URL,

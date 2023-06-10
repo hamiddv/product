@@ -4,13 +4,13 @@ from .views import add_card, get_card
 
 urlpatterns = [
     path(
-        'add_card/',
+        'add-card/',
         add_card,
         name='add card'
     ),
 
     path(
-        'get_card/',
+        'get-card/',
         get_card,
         name='get card'
     )
