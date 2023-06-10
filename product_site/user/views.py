@@ -139,6 +139,7 @@ def login_user(request):
 
 @api_view(['POST'])
 def forget_password(request):
+    print(request.data)
     email = request.data['email']
     new_code = request.data['new_code']
     new_password = request.data['new_password']
@@ -146,11 +147,27 @@ def forget_password(request):
 
     try:
         user = CustomUser.objects.get(email=email)
+        print(user.email_verify_code)
+        return Response(
+            {
+                'message': 'email found'
+            },
+            status=status.HTTP_202_ACCEPTED
+        )
     except:
         return Response(
             {
                 'message': 'email notfound'
-            }
+            },
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    if new_code is False and code is False and new_password is False:
+        return Response(
+            {
+                'message': 'data not valid'
+            },
+            status=status.HTTP_406_NOT_ACCEPTABLE
         )
 
     if new_code:
@@ -158,8 +175,12 @@ def forget_password(request):
         return Response(
             {
                 'message': 'new code created'
-            }
+            },
+            status=status.HTTP_201_CREATED
         )
+
+    print(user.email_verify_code)
+    print(code)
 
     if code is not False:
         if code == user.email_verify_code:
@@ -177,7 +198,7 @@ def forget_password(request):
                 {
                     'message': 'code is not valid'
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_406_NOT_ACCEPTABLE
             )
 
     if new_password is not False:
