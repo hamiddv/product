@@ -38,7 +38,7 @@ def add_card(request):
                     {
                         'massage': 'card saved',
                         'available': available,
-                        'max_count': product.available
+                        'max_count': product.available_count
                     },
                     status=status.HTTP_200_OK
                 )
@@ -75,6 +75,16 @@ def get_card(request):
     if user is not None:
         card = UserCard.objects.get(
             user=user
+        )
+
+        data = GetCardSerializers(
+            card,
+            many=True,
+        ).data
+
+        return Response(
+            data,
+            status=status.HTTP_200_OK
         )
 
 
