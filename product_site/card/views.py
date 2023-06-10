@@ -17,22 +17,30 @@ def add_card(request):
     id = request.data["id"]
     count = request.data["count"]
     user = find_user_by_token(username, token)
-    product_available = find_product_by_id(id)
+    product = find_product_by_id(id)
     if user is not None:
-        if product_available is not False:
-            card = UserCard(
-                user=user,
-                product=product_available,
-                count=count,
-            )
-            card.save()
-            print('massage : card saved')
-            return Response(
-                {
-                    'massage': 'card saved'
-                },
-                status=status.HTTP_200_OK
-            )
+        if product is not False:
+            if product.available_count > count:
+                card = UserCard(
+                    user=user,
+                    product=product,
+                    count=count,
+                )
+                # product.available_count = product.available_count - count
+                # product.save()
+                card.save()
+                if product.available - 1 == count:
+                    available = False
+                else:
+                    available = True
+                print('massage : card saved')
+                return Response(
+                    {
+                        'massage': 'card saved',
+                        'available': available
+                    },
+                    status=status.HTTP_200_OK
+                )
         else:
             print('massage: product dose not exist')
             return Response(

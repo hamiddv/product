@@ -17,9 +17,11 @@ def AllProductApi(request):
             products,
             many=True
         )
+
         return Response(
             serializer.data
         )
+
     except Product.DoesNotExist:
         return HttpResponseNotFound("product not found")
 
@@ -326,3 +328,4 @@ class Colorserializer(serializers.ModelSerializer):
             'id',
             'color'
         ]
+

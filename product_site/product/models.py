@@ -104,8 +104,10 @@ class Product(models.Model):
         Company,
         on_delete=models.CASCADE,
         null=True,
-        blank=True
+        blank=True,
     )
+
+    available_count = models.IntegerField(default=0)
 
     category = models.ForeignKey(
         Category,

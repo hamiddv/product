@@ -58,5 +58,5 @@ urlpatterns = [
     path(
         'filter-item/',
         filterItem
-    )
+    ),
 ]
