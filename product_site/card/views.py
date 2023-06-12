@@ -18,38 +18,39 @@ def add_card(request):
     count = request.data["count"]
     user = find_user_by_token(username, token)
     product = find_product_by_id(id)
-    if user is not None:
-        if product is not False:
-            if product.available_count > count:
-                card = UserCard(
-                    user=user,
-                    product=product,
-                    count=count,
-                )
-                # product.available_count = product.available_count - count
-                # product.save()
-                card.save()
-                if product.available - 1 == count:
-                    available = False
-                else:
-                    available = True
-                print('massage : card saved')
+    if count is not 0:
+        if user is not None:
+            if product is not False:
+                if product.available_count > count:
+                    card = UserCard(
+                        user=user,
+                        product=product,
+                        count=count,
+                    )
+                    # product.available_count = product.available_count - count
+                    # product.save()
+                    card.save()
+                    if product.available - 1 == count:
+                        available = False
+                    else:
+                        available = True
+                    print('massage : card saved')
+                    return Response(
+                        {
+                            'massage': 'card saved',
+                            'available': available,
+                            'max_count': product.available_count
+                        },
+                        status=status.HTTP_200_OK
+                    )
+            else:
+                print('massage: product dose not exist')
                 return Response(
                     {
-                        'massage': 'card saved',
-                        'available': available,
-                        'max_count': product.available_count
+                        'massage': 'product dose not exist'
                     },
-                    status=status.HTTP_200_OK
+                    status=status.HTTP_400_BAD_REQUEST
                 )
-        else:
-            print('massage: product dose not exist')
-            return Response(
-                {
-                    'massage': 'product dose not exist'
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
     else:
         print("massage: user token not found")
@@ -67,25 +68,39 @@ def get_card(request):
     username = request.data['username']
     token = request.data['token']
 
-    user = find_user_by_token(
-        username,
-        token
-    )
+    user = find_user_by_token(username, token)
 
     if user is not None:
-        card = UserCard.objects.get(
-            user=user
-        )
+        card = UserCard.objects.filter(user=user)
+        card_serialized = GetCardSerializers(card, many=True).data
+        product_id_list = [item['product'] for item in card_serialized]
 
-        data = GetCardSerializers(
-            card,
-            many=True,
-        ).data
+        products = Product.objects.filter(id__in=product_id_list)
+        product_serialized = GetProductItem(products, many=True).data
 
-        return Response(
-            data,
-            status=status.HTTP_200_OK
-        )
+        for item in card_serialized:
+            product_id = item['product']
+            product_data = next((product for product in product_serialized if product['id'] == product_id), None)
+            item['product'] = product_data
+
+        return Response(card_serialized, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class GetProductItem(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'name',
+            'price',
+            'score',
+            'available',
+            'sku',
+            'company',
+            'color',
+        ]
 
 
 class GetCardSerializers(serializers.ModelSerializer):
