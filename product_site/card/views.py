@@ -6,66 +6,66 @@ from rest_framework.response import Response
 from .find_product_by_id import find_product_by_id
 from .find_user_by_token import find_user_by_token
 from .models import UserCard
+
 from product.models import Product, Color, Company
 
 
-# @api_view(['POST'])
-# def add_card(request):
-#     print(request.data)
-#     username = request.data['username']
-#     token = request.data["token"]
-#     id = request.data["id"]
-#     count = request.data["count"]
-#     user = find_user_by_token(username, token)
-#     product = find_product_by_id(id)
-#     card = UserCard(
-#         user=user,
-#         product=product
-#     )
-#     if count is not 0:
-#
-#         if user is not None:
-#             if product is not False:
-#                 if product.available_count > count:
-#                     card = UserCard(
-#                         user=user,
-#                         product=product,
-#                         count=count,
-#                     )
-#                     # product.available_count = product.available_count - count
-#                     # product.save()
-#                     card.save()
-#                     if product.available - 1 == count:
-#                         available = False
-#                     else:
-#                         available = True
-#                     print('massage : card saved')
-#                     return Response(
-#                         {
-#                             'massage': 'card saved',
-#                             'available': available,
-#                             'max_count': product.available_count
-#                         },
-#                         status=status.HTTP_200_OK
-#                     )
-#             else:
-#                 print('massage: product dose not exist')
-#                 return Response(
-#                     {
-#                         'massage': 'product dose not exist'
-#                     },
-#                     status=status.HTTP_400_BAD_REQUEST
-#                 )
-#
-#     else:
-#         print("massage: user token not found")
-#         return Response(
-#
-#             {
-#                 "massage": "user token not found"
-#             },
-#             status=status.HTTP_400_BAD_REQUEST
-#         )
+@api_view(['POST'])
+def add_card(request):
+    print(request.data)
+    username = request.data['username']
+    token = request.data["token"]
+    id = request.data["id"]
+    count = request.data["count"]
+    user = find_user_by_token(username, token)
+    product = find_product_by_id(id)
+    card = UserCard(
+        user=user,
+        product=product
+    )
+    if count is not 0:
+
+        if user is not None:
+            if product is not False:
+                if product.available_count > count:
+                    card = UserCard.get_or_create(
+                        user=user,
+                        product=product,
+                    )
+                    # product.available_count = product.available_count - count
+                    # product.save()
+                    card.save()
+                    if product.available - 1 == count:
+                        available = False
+                    else:
+                        available = True
+                    print('massage : card saved')
+                    return Response(
+                        {
+                            'massage': 'card saved',
+                            'available': available,
+                            'max_count': product.available_count
+                        },
+                        status=status.HTTP_200_OK
+                    )
+            else:
+                print('massage: product dose not exist')
+                return Response(
+                    {
+                        'massage': 'product dose not exist'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+    else:
+        print("massage: user token not found")
+        return Response(
+
+            {
+                "massage": "user token not found"
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 @api_view(['POST'])
 def card_available(request):
@@ -88,78 +88,6 @@ def card_available(request):
         )
     else:
         return Response(
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-
-@api_view(['POST'])
-def add_card(request):
-    print(request.data)
-    username = request.data['username']
-    token = request.data["token"]
-    id = request.data["id"]
-    count = request.data["count"]
-    user = find_user_by_token(username, token)
-    product = find_product_by_id(id)
-
-    if count != 0:
-        if user is not None:
-            if product is not False:
-                if product.available_count >= count:
-                    card, created = UserCard.objects.get_or_create(
-                        user=user,
-                        product=product,
-                        defaults={'count': count}
-                    )
-                    if not created:
-
-                        print('massage: card already exists')
-                        return Response(
-                            {
-                                'massage': 'card already exists',
-                            },
-                            status=status.HTTP_200_OK
-                        )
-
-                    if product.available == count:
-                        available = False
-                    else:
-                        available = True
-
-                    print('massage: card saved')
-                    return Response(
-                        {
-                            'massage': 'card saved',
-                            'available': available,
-                            'max_count': product.available_count
-                        },
-                        status=status.HTTP_200_OK
-                    )
-
-                else:
-                    print('massage: product count is not enough')
-                    return Response(
-                        {
-                            'massage': 'product count is not enough'
-                        },
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-            else:
-                print('massage: product does not exist')
-                return Response(
-                    {
-                        'massage': 'product does not exist'
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-    else:
-        print("massage: user token not found")
-        return Response(
-            {
-                "massage": "user token not found"
-            },
             status=status.HTTP_400_BAD_REQUEST
         )
 

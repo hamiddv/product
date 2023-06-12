@@ -1,6 +1,7 @@
 from django.urls import path
 
-from .views import add_card, get_card
+from .views import add_card, get_card, card_available
+
 
 urlpatterns = [
     path(
@@ -13,5 +14,11 @@ urlpatterns = [
         'get-card/',
         get_card,
         name='get card'
+    ),
+
+    path(
+        'card-available/',
+        card_available,
+        name='card available'
     )
 ]
