@@ -67,6 +67,30 @@ from product.models import Product, Color, Company
 #             status=status.HTTP_400_BAD_REQUEST
 #         )
 
+@api_view(['POST'])
+def card_available(request):
+    token = request.data['token']
+    username = request.data['username']
+    id = request.data['id']
+    user = find_user_by_token(username, token)
+    product = find_product_by_id(id)
+    if user is not None or product is False:
+        card = UserCard.objects.get(
+            user=user,
+            product=product,
+        )
+
+        return Response(
+            {
+                'count': card.count
+            },
+            status=status.HTTP_200_OK
+        )
+    else:
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
 
 @api_view(['POST'])
 def add_card(request):
@@ -81,25 +105,23 @@ def add_card(request):
     if count != 0:
         if user is not None:
             if product is not False:
-                if product.available_count > count:
+                if product.available_count >= count:
                     card, created = UserCard.objects.get_or_create(
                         user=user,
                         product=product,
                         defaults={'count': count}
                     )
                     if not created:
-                        # کارت قبلاً وجود داشته است
+
                         print('massage: card already exists')
                         return Response(
                             {
                                 'massage': 'card already exists',
-                                'available': product.available_count - count > 0,
-                                'max_count': product.available_count
                             },
                             status=status.HTTP_200_OK
                         )
 
-                    if product.available - 1 == count:
+                    if product.available == count:
                         available = False
                     else:
                         available = True
@@ -140,7 +162,6 @@ def add_card(request):
             },
             status=status.HTTP_400_BAD_REQUEST
         )
-
 
 
 @api_view(['POST'])
