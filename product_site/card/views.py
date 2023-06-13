@@ -12,6 +12,7 @@ from product.models import Product, Color, Company
 
 @api_view(['POST'])
 def add_card(request):
+    print("*" * 2000)
     print(request.data)
     username = request.data['username']
     token = request.data["token"]
@@ -19,70 +20,64 @@ def add_card(request):
     count = request.data["count"]
     user = find_user_by_token(username, token)
     product = find_product_by_id(id)
-    card = UserCard(
-        user=user,
-        product=product
-    )
-    if count is not 0:
-
-        if user is not None:
-            if product is not False:
-                if product.available_count > count:
-                    card = UserCard.get_or_create(
-                        user=user,
-                        product=product,
-                    )
-                    # product.available_count = product.available_count - count
-                    # product.save()
-                    card.save()
-                    if product.available - 1 == count:
-                        available = False
-                    else:
-                        available = True
-                    print('massage : card saved')
-                    return Response(
-                        {
-                            'massage': 'card saved',
-                            'available': available,
-                            'max_count': product.available_count
-                        },
-                        status=status.HTTP_200_OK
-                    )
-            else:
-                print('massage: product dose not exist')
-                return Response(
-                    {
-                        'massage': 'product dose not exist'
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-    else:
-        print("massage: user token not found")
+    if count <= 0:
         return Response(
-
-            {
-                "massage": "user token not found"
-            },
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    if user is not None or product is not False or product.available_count > count:
+        card, created = UserCard.objects.get_or_create(
+            user=user,
+            product=product,
+        )
+        card.count = count
+        card.save()
+        if product.available - 1 == count:
+            available = False
+        else:
+            available = True
+        print('massage: card saved')
+        return Response(
+            {
+                'massage': 'card saved',
+                'available': available,
+                'max_count': product.available_count
+            },
+            status=status.HTTP_200_OK
+        )
+    else:
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
 @api_view(['POST'])
 def card_available(request):
+    print('card_available')
+    print('-' * 2222, request.data)
     token = request.data['token']
     username = request.data['username']
     id = request.data['id']
     user = find_user_by_token(username, token)
     product = find_product_by_id(id)
     if user is not None or product is False:
-        card = UserCard.objects.get(
-            user=user,
-            product=product,
-        )
+        try:
+            card = UserCard.objects.get(
+                user=user,
+                product=product,
+            )
+        except:
+            return Response(
+                {
+                    'count': 0,
+                },
+                status=status.HTTP_200_OK
+            )
 
         return Response(
             {
-                'count': card.count
+                'count': card.count,
+                'max_count': product.available_count
             },
             status=status.HTTP_200_OK
         )
@@ -100,7 +95,7 @@ def get_card(request):
     user = find_user_by_token(username, token)
 
     if user is not None:
-        card = UserCard.objects.filter(user=user)
+        card = UserCard.objects.filter(user=user, count__gt=0)
         card_serialized = GetCardSerializers(card, many=True).data
         product_id_list = [item['product'] for item in card_serialized]
 

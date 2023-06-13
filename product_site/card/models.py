@@ -15,4 +15,4 @@ class UserCard(models.Model):
         on_delete=models.CASCADE
     )
 
-    count = models.IntegerField()
+    count = models.IntegerField(default=0)
