@@ -74,6 +74,13 @@ def card_available(request):
                 status=status.HTTP_200_OK
             )
 
+        print(
+            {
+                'count': card.count,
+                'max_count': product.available_count
+            }
+        )
+
         return Response(
             {
                 'count': card.count,
